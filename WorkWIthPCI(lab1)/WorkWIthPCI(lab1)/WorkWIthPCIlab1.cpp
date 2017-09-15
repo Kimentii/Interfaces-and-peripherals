@@ -6,6 +6,9 @@
 #include <regstr.h>
 #include <iostream>
 #include <conio.h>
+#include <regex>
+#include <fstream>
+#include <map>
 using namespace std;
 
 const int BUFFER_SIZE = 300;
@@ -39,7 +42,8 @@ int main()
 		DWORD buffersize = BUFFER_SIZE;
 
 		deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);	//Установка размера самой структуры.
-
+		char buffer222[1000];
+		map<string, string> devices;
 		for (int i = 0; SetupDiEnumDeviceInfo(hDevInfo, i, &deviceInfoData); i++) {
 			DWORD DataT;
 			SetupDiGetDeviceRegistryProperty(
@@ -47,24 +51,36 @@ int main()
 				&deviceInfoData,							//Информация о том, какое утройство из набора требуется
 				SPDRP_DEVICEDESC,							//Требуемое свойство
 				&DataT,
-				(PBYTE)buffer,								//Буфер
+				(PBYTE)buffer222,								//Буфер
 				buffersize,									//Действительный размер буфера
 				&buffersize);								//Требуемый размер буфера
 			//cout << "Size of info " << buffersize << endl;
-			cout << buffer << endl;
+			cout << string(buffer222) << endl;
+			//devices.insert(pair<string, string>(buffer, buffer));
 			SetupDiGetDeviceRegistryProperty(
 				hDevInfo,
 				&deviceInfoData,
 				SPDRP_MFG,
 				&DataT,
-				(PBYTE)buffer,
+				(PBYTE)buffer222,
 				buffersize,
 				&buffersize);
-			cout << "Vendor ID" << buffer << endl;
+			cout << "Vendor ID" << string(buffer222) << endl;
 		}
-		_getch();
-	
+	regex regVendorID("([0-9a-f]{4})( {2})(.*)");
+	regex regDeviceID("(\t)([0-9a-f]{4})( {2})(.*)");
+	cmatch result;
+	ifstream file("pci.ids.txt");
+	char str[BUFFER_SIZE];
+	for (int i = 0; !file.eof(); i++) {
+		file.getline(str, BUFFER_SIZE);
+		if (str[0] == '#' || strlen(str) == 0) continue;
+		if (regex_match(str, result, regVendorID)) {
 
+		}
+	}
+	file.close();
+	_getch();
     return 0;
 }
 
