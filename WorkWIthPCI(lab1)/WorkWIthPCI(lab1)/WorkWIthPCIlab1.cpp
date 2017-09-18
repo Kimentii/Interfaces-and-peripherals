@@ -9,9 +9,10 @@
 #include <regex>
 #include <fstream>
 #include <map>
+#include <iterator>
 using namespace std;
 
-const int BUFFER_SIZE = 300;
+const int BUFFER_SIZE = 350;
 
 int main()
 {
@@ -34,53 +35,47 @@ int main()
 
 	SP_DEVINFO_DATA deviceInfoData;					//Структура с информацией об устройстве
 	
-
-
 		//Заполняет структуру devieInfoData
-		//DWORD DataT;
-		LPTSTR buffer = (LPTSTR)LocalAlloc(LPTR, BUFFER_SIZE);	//Выделение памяти под буфер
 		DWORD buffersize = BUFFER_SIZE;
 
 		deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);	//Установка размера самой структуры.
-		char buffer222[1000];
-		map<string, string> devices;
+		char vendorBuf[BUFFER_SIZE];
+		char deviceBuf[BUFFER_SIZE];
+
 		for (int i = 0; SetupDiEnumDeviceInfo(hDevInfo, i, &deviceInfoData); i++) {
+			memset(vendorBuf, 0, BUFFER_SIZE);
+			memset(deviceBuf, 0, BUFFER_SIZE);
 			DWORD DataT;
 			SetupDiGetDeviceRegistryProperty(
 				hDevInfo,									//Информация о наборе устройств
 				&deviceInfoData,							//Информация о том, какое утройство из набора требуется
 				SPDRP_DEVICEDESC,							//Требуемое свойство
 				&DataT,
-				(PBYTE)buffer222,								//Буфер
-				buffersize,									//Действительный размер буфера
+				(PBYTE)deviceBuf,							//Буфер
+				BUFFER_SIZE,								//Действительный размер буфера
 				&buffersize);								//Требуемый размер буфера
-			//cout << "Size of info " << buffersize << endl;
-			cout << string(buffer222) << endl;
-			//devices.insert(pair<string, string>(buffer, buffer));
+			cout << "Devicd ID: ";
+			for (int i = 0; i < BUFFER_SIZE; i++) {
+				if (deviceBuf[i])cout << deviceBuf[i];
+			}
+			cout << endl;
+			//Аналогичный вывод vendorID
 			SetupDiGetDeviceRegistryProperty(
 				hDevInfo,
 				&deviceInfoData,
 				SPDRP_MFG,
 				&DataT,
-				(PBYTE)buffer222,
-				buffersize,
+				(PBYTE)vendorBuf,
+				BUFFER_SIZE,
 				&buffersize);
-			cout << "Vendor ID" << string(buffer222) << endl;
+			cout << "	Vendor ID: ";
+			for (int i = 0; i < BUFFER_SIZE; i++) {
+				if (vendorBuf[i])cout << vendorBuf[i];
+			}
+			cout << endl;
+			cout << endl;
 		}
-	regex regVendorID("([0-9a-f]{4})( {2})(.*)");
-	regex regDeviceID("(\t)([0-9a-f]{4})( {2})(.*)");
-	cmatch result;
-	ifstream file("pci.ids.txt");
-	char str[BUFFER_SIZE];
-	for (int i = 0; !file.eof(); i++) {
-		file.getline(str, BUFFER_SIZE);
-		if (str[0] == '#' || strlen(str) == 0) continue;
-		if (regex_match(str, result, regVendorID)) {
 
-		}
-	}
-	file.close();
-	_getch();
+	system("pause");
     return 0;
 }
-
