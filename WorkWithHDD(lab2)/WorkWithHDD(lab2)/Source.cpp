@@ -8,6 +8,7 @@
 using namespace std;
 
 #define bThousand 1024
+#define Hundred 100
 
 char* busType[] = { "UNKNOWN", "SCSI", "ATAPI", "ATA", "ONE_TREE_NINE_FOUR", "SSA", "FIBRE", "USB", "RAID", "ISCSI", "SAS", "SATA", "SD", "MMC" };
 
@@ -28,10 +29,57 @@ void getDeviceInfo(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProtertyQuer
 	}
 
 	//Выводим свойства диска.
-	cout << "Product ID:    " << (char*)(deviceDescriptor)+deviceDescriptor->ProductIdOffset << endl;
+	cout << "Model:    " <<setw(30) << (char*)(deviceDescriptor)+deviceDescriptor->ProductIdOffset << endl;
 	cout << "Version        " << (char*)(deviceDescriptor)+deviceDescriptor->ProductRevisionOffset << endl;
 	cout << "Bus type:      " << busType[deviceDescriptor->BusType] << endl;
 	cout << "Serial number: " << (char*)(deviceDescriptor)+deviceDescriptor->SerialNumberOffset << endl;
+}
+
+void getMemoryInfo() {
+	string path;
+	_ULARGE_INTEGER diskSpace;
+	_ULARGE_INTEGER freeSpace;
+
+	diskSpace.QuadPart = 0;
+	freeSpace.QuadPart = 0;
+
+	_ULARGE_INTEGER totalDiskSpace;
+	_ULARGE_INTEGER totalFreeSpace;
+
+	totalDiskSpace.QuadPart = 0;				//Будет содержать полный размер диска.
+	totalFreeSpace.QuadPart = 0;				//Будет содеражть свободное место диска.
+	
+	//Получаем битовую маску, представляющую имеющиеся в настоящие время дисковые накопители.
+	unsigned long int logicalDrivesCount = GetLogicalDrives();
+		
+	cout.setf(ios::left);
+	cout<< setw(16) << "Total space[Mb]"
+		<< setw(16) << "Free space[Mb]"
+		<< setw(16) << "Busy space[%]"
+		<< endl;
+
+	//Анализ полученной битовой маски(бит 0 - диск А, бит 1 - диск B).
+	for (char var = 'A'; var < 'Z'; var++) {
+		if ((logicalDrivesCount >> var - 65) & 1 && var != 'F') {
+			path = var;
+			path.append(":\\");
+			//Получаем информация о размере диска и свободном пространстве диска.
+			GetDiskFreeSpaceEx(path.c_str(), 0, &diskSpace, &freeSpace);
+			diskSpace.QuadPart = diskSpace.QuadPart / (bThousand * bThousand);
+			freeSpace.QuadPart = freeSpace.QuadPart / (bThousand * bThousand);
+
+			//Определяем тип диска(3 - жесткий диск)
+			if (GetDriveType(path.c_str()) == 3) {
+				totalDiskSpace.QuadPart += diskSpace.QuadPart;
+				totalFreeSpace.QuadPart += freeSpace.QuadPart;
+			}
+		}
+	}
+
+	cout	<< setw(16) << totalDiskSpace.QuadPart
+		<< setw(16) << totalFreeSpace.QuadPart
+		<< setw(16) << setprecision(3) << 100.0 - (double)totalFreeSpace.QuadPart / (double)totalDiskSpace.QuadPart * Hundred
+		<< endl;
 }
 
 int main()
@@ -48,6 +96,7 @@ int main()
 		return -1;
 	}
 	getDeviceInfo(diskHandle, storageProtertyQuery);
+	getMemoryInfo();
 	_getch();
 	return 0;
 }
