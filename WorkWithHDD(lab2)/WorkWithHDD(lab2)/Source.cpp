@@ -106,10 +106,6 @@ void getAtaSupportStandarts(HANDLE diskHandle) {
 	}
 	WORD *data = (WORD *)(identifyDataBuffer + sizeof(ATA_PASS_THROUGH_EX));	//Получаем указатель на массив полученных данных
 	short ataSupportByte = data[80];
-	int dma_support = data[88];
-	if (dma_support) {
-		cout << "Transfer mode: dma\n";
-	}
 	int i = 2 * BYTE_SIZE;
 	int bitArray[2 * BYTE_SIZE];
 	//Превращаем байты с информацией о поддержке ATA в массив бит
@@ -131,6 +127,23 @@ void getAtaSupportStandarts(HANDLE diskHandle) {
 	cout << endl;
 }
 
+void getMemoryTransferMode(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProtertyQuery) {
+	STORAGE_ADAPTER_DESCRIPTOR adapterDescriptor;			//Структура со свойствами устройства
+	if (!DeviceIoControl(diskHandle, 
+		IOCTL_STORAGE_QUERY_PROPERTY,						//Отправляем запрос на возврат свойств устройства.
+		&storageProtertyQuery, sizeof(storageProtertyQuery), &adapterDescriptor, sizeof(STORAGE_DESCRIPTOR_HEADER), NULL, NULL)) {
+		cout << GetLastError();
+		exit(-1);
+	}
+	else {
+		//Вывод режима доступа к памяти
+		cout << "Transfer mode: ";
+		adapterDescriptor.AdapterUsesPio ? cout << "PIO" : cout << "DMA";
+		cout << endl;
+	}
+}
+
+
 int main()
 {
 	STORAGE_PROPERTY_QUERY storageProtertyQuery;				//Структура с информацией об запросе
@@ -147,6 +160,7 @@ int main()
 	getDeviceInfo(diskHandle, storageProtertyQuery);
 	getMemoryInfo();
 	getAtaSupportStandarts(diskHandle);
+	getMemoryTransferMode(diskHandle, storageProtertyQuery);
 	_getch();
 	return 0;
 }
