@@ -9,6 +9,7 @@ using namespace std;
 
 #define bThousand 1024
 #define Hundred 100
+#define BYTE_SIZE 8
 
 char* busType[] = { "UNKNOWN", "SCSI", "ATAPI", "ATA", "ONE_TREE_NINE_FOUR", "SSA", "FIBRE", "USB", "RAID", "ISCSI", "SAS", "SATA", "SD", "MMC" };
 
@@ -82,6 +83,54 @@ void getMemoryInfo() {
 		<< endl;
 }
 
+void getAtaSupportStandarts(HANDLE diskHandle) {
+
+	UCHAR identifyDataBuffer[512 + sizeof(ATA_PASS_THROUGH_EX)] = { 0 };
+
+	ATA_PASS_THROUGH_EX &PTE = *(ATA_PASS_THROUGH_EX *)identifyDataBuffer;	//Структура для отправки АТА команды устройству
+	PTE.Length = sizeof(PTE);
+	PTE.TimeOutValue = 10;									//Размер структуры
+	PTE.DataTransferLength = 512;							//Размер буфера для данных
+	PTE.DataBufferOffset = sizeof(ATA_PASS_THROUGH_EX);		//Смещение в байтах от начала структуры до буфера данных
+	PTE.AtaFlags = ATA_FLAGS_DATA_IN;						//Флаг, говорящий о чтении байтов из устройства
+
+	IDEREGS *ideRegs = (IDEREGS *)PTE.CurrentTaskFile;
+	ideRegs->bCommandReg = 0xEC;
+
+	//Производим запрос устройству
+	if (!DeviceIoControl(diskHandle, 
+		IOCTL_ATA_PASS_THROUGH,								//Флаг, говорящий что мы посылаем структуру с командами типа ATA_PASS_THROUGH_EX
+		&PTE, sizeof(identifyDataBuffer), &PTE, sizeof(identifyDataBuffer), NULL, NULL)) {
+		cout << GetLastError() << std::endl;
+		return;
+	}
+	WORD *data = (WORD *)(identifyDataBuffer + sizeof(ATA_PASS_THROUGH_EX));	//Получаем указатель на массив полученных данных
+	short ataSupportByte = data[80];
+	int dma_support = data[88];
+	if (dma_support) {
+		cout << "Transfer mode: dma\n";
+	}
+	int i = 2 * BYTE_SIZE;
+	int bitArray[2 * BYTE_SIZE];
+	//Превращаем байты с информацией о поддержке ATA в массив бит
+	while (i--) {
+		bitArray[i] = ataSupportByte & 32768 ? 1 : 0;
+		ataSupportByte = ataSupportByte << 1;
+	}
+
+	//Анализируем полученный массив бит.
+	cout << "ATA Support:   ";
+	for (int i = 8; i >= 4; i--) {
+		if (bitArray[i] == 1) {
+			cout << "ATA" << i;
+			if (i != 4) {
+				cout << ", ";
+			}
+		}
+	}
+	cout << endl;
+}
+
 int main()
 {
 	STORAGE_PROPERTY_QUERY storageProtertyQuery;				//Структура с информацией об запросе
@@ -97,6 +146,7 @@ int main()
 	}
 	getDeviceInfo(diskHandle, storageProtertyQuery);
 	getMemoryInfo();
+	getAtaSupportStandarts(diskHandle);
 	_getch();
 	return 0;
 }
