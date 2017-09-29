@@ -11,7 +11,8 @@
         android:theme="@style/AppTheme">
 
         <service android:enabled="true" android:name="MyService" />
-
+        <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+        
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
