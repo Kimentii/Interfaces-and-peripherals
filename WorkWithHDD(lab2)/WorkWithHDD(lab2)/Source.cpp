@@ -143,20 +143,24 @@ void getMemoryTransferMode(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProt
 	}
 }
 
+void init(HANDLE& diskHandle) {
+	//Открытие файла с информацией о диске
+	diskHandle = CreateFile("//./PhysicalDrive0", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	if (diskHandle == INVALID_HANDLE_VALUE) {
+		cout << GetLastError();
+		_getch();
+		return;
+	}
+}
 
 int main()
 {
 	STORAGE_PROPERTY_QUERY storageProtertyQuery;				//Структура с информацией об запросе
 	storageProtertyQuery.QueryType = PropertyStandardQuery;		//Запрос драйвера, чтобы он вернул дескриптор устройства.
 	storageProtertyQuery.PropertyId = StorageDeviceProperty;	//Флаг, гооврящий мы хотим получить дескриптор устройства.
+	HANDLE diskHandle;
 
-																//Открытие файла с информацией о диске
-	HANDLE diskHandle = CreateFile("//./PhysicalDrive0", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-	if (diskHandle == INVALID_HANDLE_VALUE) {
-		cout << GetLastError();
-		_getch();
-		return -1;
-	}
+	init(diskHandle);
 	getDeviceInfo(diskHandle, storageProtertyQuery);
 	getMemoryInfo();
 	getAtaSupportStandarts(diskHandle);

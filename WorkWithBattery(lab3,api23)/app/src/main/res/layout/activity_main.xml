@@ -4,25 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.kimentii.workwithbatterylab3.MainActivity">
-
-    <Button
-        android:id="@+id/create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/destroy_bytton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="29dp"
-        android:text="Create service" />
-
-    <Button
-        android:id="@+id/destroy_bytton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="52dp"
-        android:text="destroy service" />
+    tools:context="com.example.kimentii.workwithbatterylab3api23.MainActivity">
 
     <SeekBar
         android:id="@+id/seekBar"
@@ -40,7 +22,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/seekBar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="17dp">
+        android:layout_marginTop="17dp"
+        android:id="@+id/tableLayout">
 
         <TableRow
             android:layout_width="match_parent"
@@ -94,5 +77,15 @@
 
         </TableRow>
     </TableLayout>
+
+    <EditText
+        android:id="@+id/outputField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:layout_below="@+id/tableLayout"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

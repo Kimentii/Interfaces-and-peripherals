@@ -1,4 +1,4 @@
-package com.example.kimentii.workwithbatterylab3;
+package com.example.kimentii.workwithbatterylab3api23;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -31,22 +32,7 @@ public class MainActivity extends AppCompatActivity {
     TextView voltage;
     TextView time_left;
     SeekBar seekBar;
-
-    public class Listener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.create_button:
-                    Log.d("myTag", "Create Button was pressed");
-                    startService(new Intent(getApplicationContext(), MyService.class));
-                    break;
-                case R.id.destroy_bytton:
-                    stopService(new Intent(getApplicationContext(), MyService.class));
-                    break;
-            }
-        }
-    }
+    EditText outputField;
 
     public void seekBarInit() {
         int Brightness;
@@ -71,21 +57,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        createService = (Button) findViewById(R.id.create_button);
-        destroyService = (Button) findViewById(R.id.destroy_bytton);
-        Listener listener = new Listener();
-        createService.setOnClickListener(listener);
-        destroyService.setOnClickListener(listener);
         scale = (TextView) findViewById(R.id.extraScale);
         level = (TextView) findViewById(R.id.extreLevel);
         plugged = (TextView) findViewById(R.id.extraPlagged);
         voltage = (TextView) findViewById(R.id.extraVoltage);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         time_left = (TextView) findViewById(R.id.time_left);
-        seekBarInit();
+        //seekBarInit();
         BroadcastReceiver receiver = new BroadcastReceiver() {
 
             long firstMeasurementVoltage;
@@ -95,14 +76,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                int status = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                /*int status = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                 scale.setText(String.valueOf(status));
                 status = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 level.setText(String.valueOf(status));
                 status = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 plugged.setText(String.valueOf(status));
-                status = intent.getIntExtra(BatteryManager.ACTION_DISCHARGING, -1);
-                /*if (firstMeasurementTime == 0) {
+                status = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+                voltage.setText(String.valueOf(status));
+                if (firstMeasurementTime == 0) {
                     firstMeasurementTime = System.currentTimeMillis();
                     firstMeasurementVoltage = status;
                     time_left.setText("Calculating...");
@@ -118,10 +100,30 @@ public class MainActivity extends AppCompatActivity {
                     time_left.setText("Seconds left: " + time);
                     firstMeasurementTime = secondMeasurementTime;
                     firstMeasurementVoltage = secondMeasurementVoltage;
-                }*/
-                voltage.setText(String.valueOf(status));
+                }
+                */
+                String disc = intent.getStringExtra(BatteryManager.ACTION_DISCHARGING);
+                outputField.append("ACTION_DISCHARGING " + disc);
+
             }
         };
+        outputField = (EditText) findViewById(R.id.outputField);
+        outputField.setEnabled(false);
+        BatteryManager mBatteryManager;
+        mBatteryManager = (BatteryManager) getApplicationContext().getSystemService(Context.BATTERY_SERVICE);
+
+        outputField.append("BATTERY_PROPERTY_CHARGE_COUNTER: " +
+                mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER) +
+                "\n");
+        outputField.append("BATTERY_PROPERTY_CAPACITY: " +
+                mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) +
+                "\n");
+        outputField.append("BATTERY_PROPERTY_ENERGY_COUNTER: " +
+                mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER) +
+                "\n");
+        outputField.append("BATTERY_PROPERTY_CURRENT_AVERAGE: " +
+                mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE) +
+                "\n");
 
         registerReceiver(receiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         Log.d("myTag", "Application was started");
