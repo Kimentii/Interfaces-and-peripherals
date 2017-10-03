@@ -94,14 +94,17 @@ multimap<string, string> getDescription(multimap<string, string> values) {
 			if (regex_match(str, result, regVendorID)) {
 				if (string(result[1]) == it->first) {
 					string vendor = result[3];
-					cout << "Found vendor: " << result[1] << endl;
 					file.getline(str, BUFFER_SIZE);
-					while (regex_match(str, result, regDeviceID)) {
-						if (string(result[2]) == it->second) {
-							string device = result[4];
-							description.insert(pair<string, string>(vendor, device));
-							isFound = true;
-							break;
+					while (!regex_match(str, result, regVendorID)) {
+						if (regex_match(str, result, regDeviceID)) {
+							if (string(result[2]) == it->second) {
+								string device = result[4];
+								cout << "Vendor: " << vendor << endl;
+								cout << "	Device: " << device << endl;
+								description.insert(pair<string, string>(vendor, device));
+								isFound = true;
+								break;
+							}
 						}
 						file.getline(str, BUFFER_SIZE);
 					}
@@ -111,8 +114,6 @@ multimap<string, string> getDescription(multimap<string, string> values) {
 		}
 		file.close();
 		file.open("pci.ids.txt");
-		//file.seekg(0, ios::beg);
-		//file.clear();
 	}
 	file.close();
 	return description;
@@ -122,11 +123,6 @@ int main()
 {
 	multimap<string, string> values = getDeviceList();
 	multimap<string, string> des = getDescription(values);
-	auto it = des.begin();
-	while (it != des.end()) {
-		cout << it->first << " " << it->second << endl;
-		it++;
-	}
 	system("pause");
     return 0;
 }
