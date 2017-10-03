@@ -10,9 +10,16 @@
 #include <fstream>
 #include <map>
 #include <iterator>
+#include <algorithm>
+#include <string> 
 using namespace std;
 
 const int BUFFER_SIZE = 350;
+
+string toLowercase(string str) {
+	std::transform(str.begin(), str.end(), str.begin(), tolower);
+	return str;
+}
 
 multimap<string, string> getDeviceList() {
 	HDEVINFO hDevInfo;								//Дескриптор нбора информации об устройстве
@@ -61,20 +68,62 @@ multimap<string, string> getDeviceList() {
 		
 		cmatch result;
 		if (regex_search(info, result, code)) {
-			values.insert(pair<string, string>(string(result[2]), string(result[4])));
+			values.insert(pair<string, string>(toLowercase(string(result[2])), toLowercase(string(result[4]))));
 		}
-		cout << endl;
 	}
 	return values;
 }
 
-int main()
-{
+multimap<string, string> getDescription(multimap<string, string> values) {
+	multimap<string, string> description;
 	regex regVendorID("([0-9a-f]{4})( {2})(.*)");
 	regex regDeviceID("(\t)([0-9a-f]{4})( {2})(.*)");
-	multimap<string, string> values = getDeviceList();
+	cmatch result;
+	ifstream file("pci.ids.txt");
+	if (!file.is_open()) {
+		cout << "Error with opening file." << endl;
+	}
+	char str[BUFFER_SIZE];
 	auto it = values.begin();
-	while (it != values.end()) {
+	bool isFound;
+	for (int i =0; it != values.end(); it++) {
+		isFound = false;
+		for (int i = 0; !file.eof(); i++) {
+			file.getline(str, BUFFER_SIZE);
+			if (str[0] == '#' || strlen(str) == 0) continue;
+			if (regex_match(str, result, regVendorID)) {
+				if (string(result[1]) == it->first) {
+					string vendor = result[3];
+					cout << "Found vendor: " << result[1] << endl;
+					file.getline(str, BUFFER_SIZE);
+					while (regex_match(str, result, regDeviceID)) {
+						if (string(result[2]) == it->second) {
+							string device = result[4];
+							description.insert(pair<string, string>(vendor, device));
+							isFound = true;
+							break;
+						}
+						file.getline(str, BUFFER_SIZE);
+					}
+				}
+			}
+			if (isFound) break;
+		}
+		file.close();
+		file.open("pci.ids.txt");
+		//file.seekg(0, ios::beg);
+		//file.clear();
+	}
+	file.close();
+	return description;
+}
+
+int main()
+{
+	multimap<string, string> values = getDeviceList();
+	multimap<string, string> des = getDescription(values);
+	auto it = des.begin();
+	while (it != des.end()) {
 		cout << it->first << " " << it->second << endl;
 		it++;
 	}
