@@ -121,8 +121,7 @@ multimap<string, string> getDescription(multimap<string, string> values) {
 
 int main()
 {
-	multimap<string, string> values = getDeviceList();
-	multimap<string, string> des = getDescription(values);
+	getDescription(getDeviceList());
 	system("pause");
     return 0;
 }

@@ -83,7 +83,7 @@ void getMemoryInfo() {
 		<< endl;
 }
 
-void getAtaSupportStandarts(HANDLE diskHandle) {
+void getAtaPioDmaSupportStandarts(HANDLE diskHandle) {
 
 	UCHAR identifyDataBuffer[512 + sizeof(ATA_PASS_THROUGH_EX)] = { 0 };
 
@@ -125,8 +125,45 @@ void getAtaSupportStandarts(HANDLE diskHandle) {
 		}
 	}
 	cout << endl;
-}
+	
+	//Вывод поддерживаемых режимов DMA
+	unsigned short dmaSupportedBytes = data[63];
+	int i2 = 2 * BYTE_SIZE;
+	//Превращаем байты с информацией о поддержке DMA в массив бит
+	while (i2--) {
+		bitArray[i2] = dmaSupportedBytes & 32768 ? 1 : 0;
+		dmaSupportedBytes = dmaSupportedBytes << 1;
+	}
 
+	//Анализируем полученный массив бит.
+	cout << "DMA Support:   ";
+	for (int i = 0; i <8; i++) {
+		if (bitArray[i] == 1) {
+			cout << "DMA" << i;
+			if(i!= 2) cout << ", ";
+		}
+	}
+	cout << endl;
+
+	unsigned short pioSupportedBytes = data[63];
+	int i3 = 2 * BYTE_SIZE;
+	//Превращаем байты с информацией о поддержке PIO в массив бит
+	while (i3--) {
+		bitArray[i3] = pioSupportedBytes & 32768 ? 1 : 0;
+		pioSupportedBytes = pioSupportedBytes << 1;
+	}
+
+	//Анализируем полученный массив бит.
+	cout << "PIO Support:   ";
+	for (int i = 0; i <2; i++) {
+		if (bitArray[i] == 1) {
+			cout << "PIO" << i + 3;
+			if(i!=1) cout << ", ";
+		}
+	}
+	cout << endl;
+}
+/*
 void getMemoryTransferMode(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProtertyQuery) {
 	STORAGE_ADAPTER_DESCRIPTOR adapterDescriptor;			//Структура со свойствами устройства
 	if (!DeviceIoControl(diskHandle, 
@@ -142,7 +179,7 @@ void getMemoryTransferMode(HANDLE diskHandle, STORAGE_PROPERTY_QUERY storageProt
 		cout << endl;
 	}
 }
-
+*/
 void init(HANDLE& diskHandle) {
 	//Открытие файла с информацией о диске
 	diskHandle = CreateFile("//./PhysicalDrive0", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
@@ -155,16 +192,16 @@ void init(HANDLE& diskHandle) {
 
 int main()
 {
-	STORAGE_PROPERTY_QUERY storageProtertyQuery;				//Структура с информацией об запросе
-	storageProtertyQuery.QueryType = PropertyStandardQuery;		//Запрос драйвера, чтобы он вернул дескриптор устройства.
-	storageProtertyQuery.PropertyId = StorageDeviceProperty;	//Флаг, гооврящий мы хотим получить дескриптор устройства.
+	STORAGE_PROPERTY_QUERY storagePropertyQuery;				//Структура с информацией об запросе
+	storagePropertyQuery.QueryType = PropertyStandardQuery;		//Запрос драйвера, чтобы он вернул дескриптор устройства.
+	storagePropertyQuery.PropertyId = StorageDeviceProperty;	//Флаг, гооврящий мы хотим получить дескриптор устройства.
 	HANDLE diskHandle;
 
 	init(diskHandle);
-	getDeviceInfo(diskHandle, storageProtertyQuery);
+	getDeviceInfo(diskHandle, storagePropertyQuery);
 	getMemoryInfo();
-	getAtaSupportStandarts(diskHandle);
-	getMemoryTransferMode(diskHandle, storageProtertyQuery);
+	getAtaPioDmaSupportStandarts(diskHandle);
+	//getMemoryTransferMode(diskHandle, storagePropertyQuery);
 	_getch();
 	return 0;
 }
