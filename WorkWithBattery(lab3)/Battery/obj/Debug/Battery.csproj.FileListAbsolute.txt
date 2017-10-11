@@ -1,0 +1,10 @@
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\bin\Debug\Battery.exe.config
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\bin\Debug\Battery.exe
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\bin\Debug\Battery.pdb
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.csprojResolveAssemblyReference.cache
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.Battery.resources
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.Properties.Resources.resources
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.csproj.GenerateResource.Cache
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.csproj.CoreCompileInputs.cache
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.exe
+E:\study\IPD\Interfaces-and-peripherals\WorkWithBattery(lab3)\Battery\obj\Debug\Battery.pdb
