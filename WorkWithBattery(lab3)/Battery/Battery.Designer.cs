@@ -64,6 +64,7 @@
             this.timeoutBox.Name = "timeoutBox";
             this.timeoutBox.Size = new System.Drawing.Size(211, 21);
             this.timeoutBox.TabIndex = 30;
+            this.timeoutBox.SelectedIndexChanged += new System.EventHandler(this.timeoutBox_SelectedIndexChanged);
             this.timeoutBox.SelectionChangeCommitted += new System.EventHandler(this.timeoutBox_ValueChanged);
             // 
             // timeoutLabel
@@ -100,6 +101,7 @@
             this.Percentage.ReadOnly = true;
             this.Percentage.Size = new System.Drawing.Size(211, 20);
             this.Percentage.TabIndex = 25;
+            this.Percentage.TextChanged += new System.EventHandler(this.Percentage_TextChanged);
             // 
             // State
             // 
@@ -111,6 +113,7 @@
             this.State.ReadOnly = true;
             this.State.Size = new System.Drawing.Size(211, 20);
             this.State.TabIndex = 23;
+            this.State.TextChanged += new System.EventHandler(this.State_TextChanged);
             // 
             // label2
             // 

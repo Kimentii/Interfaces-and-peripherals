@@ -12,16 +12,16 @@ namespace Battery
             InitializeComponent();
         }
 
-        //Method for initialization of states of app
+        //Метод для инициализации состояния батареи
         private void battery_Load(object sender, EventArgs e)
         {
-            //Getting the state of time of the battery
+            //Получаем состояние батареи
             _manager.Init();
             if (_manager.charging == "Online")
                 timeoutBox.Enabled = false;
             UpdateBattery(null, null);
-            //Setting the event of timer
-            UpdateTimer.Tick += UpdateBattery;
+            //Установка события таймера
+            UpdateTimer.Tick += UpdateBattery;              //Добавляем метод, который будет вызывать таймер
             UpdateTimer.Interval = 2000;
             UpdateTimer.Start();
 
@@ -35,7 +35,7 @@ namespace Battery
             State.Text = _manager.charging;
             Percentage.Text = _manager.percent_battery;
             timeLeft.Text = _manager.work_time;
-            //Checking if we need to unlock the dropdown
+            //Проверка нужно ли нам разблокировать спикок.
             if (_manager.previous_charging != State.Text)
             {
                 if (_manager.previous_charging == "Offline")
@@ -65,6 +65,21 @@ namespace Battery
         }
 
         private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void timeoutBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void State_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Percentage_TextChanged(object sender, EventArgs e)
         {
 
         }
