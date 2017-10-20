@@ -7,77 +7,77 @@ namespace Battery
 {
     public class BatteryManager
     {
-        public int previous_screenTime { get; set; }
-        public string charging { get; set; }
-        public string percent_battery { get; set; }
-        public string work_time { get; set; }
-        public string previous_charging { get; set; }
-        public bool start_app { get; set; }
+        public int PreviousScreenTime { get; set; }
+        public string Charging { get; set; }
+        public string PercentBattery { get; set; }
+        public string WorkTime { get; set; }
+        public string PreviousCharging { get; set; }
+        public bool StartApp { get; set; }
 
         public void Init()
         {
-            start_app = true;
-            previous_screenTime = get_screen_time();
-            update_data();
+            StartApp = true;
+            PreviousScreenTime = GetScreenTime();
+            UpdateData();
         }
-        //method for getting current state of time
-        public int get_screen_time()
+
+        public int GetScreenTime()
         {
-            //Запуск консоли
-            var proc_Cmd = new Process();
-            proc_Cmd.StartInfo.UseShellExecute = false;                         //Не нужно использовать оболочку системы для запуска процесса
-            proc_Cmd.StartInfo.RedirectStandardOutput = true;                   //Нужно записывать данные приложения в поток
-            proc_Cmd.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;         //Стиль окна
-            proc_Cmd.StartInfo.FileName = "cmd.exe";
-            //Суть: /c - выполнение указанной команды с последующим завершением. powercfg - программа для выполнения, /q - аргумент
-            //программе powercfg, указывающий вывести содержимое схемы управления питанием.
-            proc_Cmd.StartInfo.Arguments = "/c powercfg /q";
-            proc_Cmd.Start();
-            //Нам нужно только VIDEOIDLE и его последняя строка
-            var power_Config = proc_Cmd.StandardOutput.ReadToEnd();             //Считываем все символы с текущей позиции до конца.
-            var last_String = new Regex("VIDEOIDLE.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*");
-            var video_Idle = last_String.Match(power_Config).Value;
-            //Нам нужно только 16 значений
-            var battery_State = video_Idle.Substring(video_Idle.Length - 11).TrimEnd();
-            //Преобразуем строку в число
+            // Запуск консоли.
+            var processCmd = new Process();
+            processCmd.StartInfo.UseShellExecute = false;                         //Не нужно использовать оболочку системы для запуска процесса
+            processCmd.StartInfo.RedirectStandardOutput = true;                   //Нужно записывать данные приложения в поток
+            processCmd.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;         //Стиль окна
+            processCmd.StartInfo.FileName = "cmd.exe";
+            // Суть: /c - выполнение указанной команды с последующим завершением. powercfg - программа для выполнения, /q - аргумент
+            // программе powercfg, указывающий вывести содержимое схемы управления питанием.
+            processCmd.StartInfo.Arguments = "/c powercfg /q";
+            processCmd.Start();
+            // Нам нужно только VIDEOIDLE и его последняя строка
+            var powerConfig = processCmd.StandardOutput.ReadToEnd();             //Считываем все символы с текущей позиции до конца.
+            var lastString = new Regex("VIDEOIDLE.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*");
+            var videoIdle = lastString.Match(powerConfig).Value;
+            // Нам нужно только 16 значений.
+            var battery_State = videoIdle.Substring(videoIdle.Length - 11).TrimEnd();
+            // Преобразуем строку в число.
             return Convert.ToInt32(battery_State, 16) / 60;
         }
-        public void update_data()
+        public void UpdateData()
         {
-            //Получаем состояние зарядки/не зарядки
-            charging = SystemInformation.PowerStatus.PowerLineStatus.ToString();
-            //Иницилиазируем состояние заряда один раз
-            if (start_app)
+            // Получаем состояние зарядки/не зарядки.
+            Charging = SystemInformation.PowerStatus.PowerLineStatus.ToString();
+            // Иницилиазируем состояние заряда один раз.
+            if (StartApp)
             {
-                previous_charging = charging;
-                start_app = false;
+                PreviousCharging = Charging;
+                StartApp = false;
             }
-            //Получаем текущий процент батареии
-            percent_battery = SystemInformation.PowerStatus.BatteryLifePercent * 100 + "%";
-            //Если зарядное устройство не подключено
-            if (charging == "Offline")
+            // Получаем текущий процент батареии.
+            PercentBattery = SystemInformation.PowerStatus.BatteryLifePercent * 100 + "%";
+            // Если зарядное устройство не подключено.
+            if (Charging == "Offline")
             {
-                //Тогда вычисляем оставшееся время жизни
-                var calc_life = SystemInformation.PowerStatus.BatteryLifeRemaining;
-                //Если мы не получили релуьтата, то впродолжаем вычислять
-                if (calc_life != -1)
+                // Тогда вычисляем оставшееся время жизни.
+                var calcLife = SystemInformation.PowerStatus.BatteryLifeRemaining;
+                // Если мы не получили релуьтата, то впродолжаем вычислять.
+                if (calcLife != -1)
                 {
-                    //Если оставшееся время вычислено, то выводим его
-                    var span = new TimeSpan(0, 0, calc_life);
-                    work_time = span.ToString("g");
+                    // Если оставшееся время вычислено, то выводим его.
+                    var span = new TimeSpan(0, 0, calcLife);
+                    WorkTime = span.ToString("g");
                 }
-                else work_time = "Calculating";
+                else WorkTime = "Calculating";
             }
             else
             {
-                work_time = "AC";
+                WorkTime = "AC";
             }
         }
 
-        //Метод для изменения вермени отключения экрана
+        // Метод для изменения вермени отключения экрана.
         public void SetDisplayOff(int value)
         {
-            //Используем для выключения экрана cmd
+            // Используем для выключения экрана cmd.
             var p = new Process();
             p.StartInfo.FileName = "cmd.exe";
             p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;

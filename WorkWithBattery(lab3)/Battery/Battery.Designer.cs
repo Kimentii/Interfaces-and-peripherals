@@ -64,8 +64,7 @@
             this.timeoutBox.Name = "timeoutBox";
             this.timeoutBox.Size = new System.Drawing.Size(211, 21);
             this.timeoutBox.TabIndex = 30;
-            this.timeoutBox.SelectedIndexChanged += new System.EventHandler(this.timeoutBox_SelectedIndexChanged);
-            this.timeoutBox.SelectionChangeCommitted += new System.EventHandler(this.timeoutBox_ValueChanged);
+            this.timeoutBox.SelectionChangeCommitted += new System.EventHandler(this.TimeoutBoxValueChanged);
             // 
             // timeoutLabel
             // 
@@ -101,7 +100,6 @@
             this.Percentage.ReadOnly = true;
             this.Percentage.Size = new System.Drawing.Size(211, 20);
             this.Percentage.TabIndex = 25;
-            this.Percentage.TextChanged += new System.EventHandler(this.Percentage_TextChanged);
             // 
             // State
             // 
@@ -113,7 +111,6 @@
             this.State.ReadOnly = true;
             this.State.Size = new System.Drawing.Size(211, 20);
             this.State.TabIndex = 23;
-            this.State.TextChanged += new System.EventHandler(this.State_TextChanged);
             // 
             // label2
             // 
@@ -154,7 +151,6 @@
             this.label1.Size = new System.Drawing.Size(53, 15);
             this.label1.TabIndex = 26;
             this.label1.Text = "Plugged:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // Battery
             // 
@@ -175,7 +171,7 @@
             this.Name = "Battery";
             this.Text = "Power Manager";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AppClosing);
-            this.Load += new System.EventHandler(this.battery_Load);
+            this.Load += new System.EventHandler(this.BatteryLoad);
             this.ResumeLayout(false);
             this.PerformLayout();
 
